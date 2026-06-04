@@ -1,0 +1,59 @@
+[project]
+name = "pa-agent"
+version = "0.1.0"
+description = "Voice-first personal assistant: iPhone → webhook → Claude → Notion + Google Calendar."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "Your Name" }]
+license = { text = "MIT" }
+
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "pydantic>=2.9.0",
+    "pydantic-settings>=2.5.0",
+    "python-dotenv>=1.0.1",
+    "structlog>=24.4.0",
+    "anthropic>=0.40.0",
+    "notion-client>=2.2.1",
+    "httpx>=0.27.0",
+    "tzdata>=2024.1",
+    # Web Push (Tier-3 notifications). cryptography is a transitive dep
+    # for VAPID signing; manylinux wheels work in Lambda python3.11 arm64.
+    "pywebpush>=2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "respx>=0.21.1",
+    "ruff>=0.7.0",
+    "mypy>=1.13.0",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "-ra -q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "N", "SIM"]
+ignore = ["E501"]  # let formatter handle line length
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+ignore_missing_imports = true

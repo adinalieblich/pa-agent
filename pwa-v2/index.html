@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no" />
+
+    <!-- Brand colour drives the iOS status-bar tint when installed standalone. -->
+    <meta name="theme-color" content="#b73579" />
+    <meta name="color-scheme" content="light" />
+    <meta name="description" content="Voice-first personal AI assistant" />
+
+    <!-- iOS PWA install behaviour -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="PA" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- App icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/pwa-v2/icons/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/pwa-v2/icons/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/pwa-v2/icons/favicon-16.png" />
+    <link rel="shortcut icon" href="/pwa-v2/icons/favicon.ico" />
+
+    <title>PA-Agent</title>
+
+    <!-- Fonts: preconnect for speed, then load Fraunces serif + Inter Tight sans. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,500;9..144,1,400;9..144,1,500&family=Inter+Tight:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

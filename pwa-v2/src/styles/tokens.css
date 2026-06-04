@@ -1,0 +1,51 @@
+/* Jeweled Cream design tokens — extracted verbatim from
+ * docs/pwa_full_mockup.html (lines 11–38).
+ *
+ * Do not change values without updating the mockup first. The mockup is
+ * the visual source of truth per docs/PWA_BUILD_SPEC.md.
+ */
+
+:root {
+  /* Cream palette */
+  --bg:         #f9f0e5;
+  --bg-deep:    #f4e5d4;
+  --ink:        #2a1a14;
+  --ink-soft:   #5c3a2e;
+  --muted:      #8a6a55;
+  --cream:      #fdf6ec;
+  --rule:       #e8dac0;
+  --rule-soft:  #efe3cf;
+
+  /* Jewel tones */
+  --ruby:        #791f1f;
+  --ruby-bg:     #f5d6d6;
+  --emerald:     #1d6e56;
+  --emerald-bg:  #d4e8df;
+  --amethyst:    #5c2848;
+  --amethyst-bg: #ebd8f0;
+  --magenta:     #b73579;
+  --magenta-bg:  #f5d6e8;
+  --topaz:       #8a4a2c;
+  --topaz-bg:    #f4d6c0;
+  --sapphire:    #1d4a6e;
+  --sapphire-bg: #c5d8ea;
+
+  /* Focus-card gradient (extracted from .focus-card in mockup) */
+  --focus-grad: linear-gradient(135deg, #f5d6e8 0%, #e8c5f0 100%);
+
+  /* Spacing rhythm */
+  --pad-page-x:    22px;
+  --pad-card-x:    16px;
+  --gap-card-y:    6px;
+  --gap-section-y: 18px;
+
+  /* Border radii */
+  --r-card:    12px;
+  --r-focus:   14px;
+  --r-pill:    99px;
+  --r-stat:    10px;
+
+  /* Font stacks */
+  --font-serif: "Fraunces", Georgia, serif;
+  --font-sans:  "Inter Tight", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}

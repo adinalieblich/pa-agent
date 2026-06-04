@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>PA — top-of-screen options</title>
+<style>
+  /* Cream + magenta palette extracted from PA-Agent tokens */
+  :root {
+    --bg:         #f9f0e5;
+    --cream:      #fdf6ec;
+    --ink:        #2a1a14;
+    --muted:      #8a6a55;
+    --rule:       #e8dac0;
+    --rule-soft:  #efe3cf;
+    --magenta:    #b73579;
+    --magenta-bg: #f5d6e8;
+    --amethyst:   #5c2848;
+    --emerald:    #1d6e56;
+    --ruby:       #791f1f;
+    --topaz:      #8a4a2c;
+    --topaz-bg:   #f4d6c0;
+    --font-serif: "Fraunces", Georgia, serif;
+    --font-sans:  "Inter Tight", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    /* Simulate iPhone 14 Pro Dynamic Island safe-area top inset */
+    --notch:      54px;
+  }
+
+  /* Page styling around the mockups */
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: #1a1a1a;
+    font-family: var(--font-sans);
+    color: #ddd;
+    padding: 24px 12px 80px;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1 {
+    font-family: var(--font-serif);
+    font-size: 24px;
+    color: #fff;
+    text-align: center;
+    margin: 0 0 4px;
+  }
+  .lead {
+    text-align: center;
+    font-size: 13px;
+    color: #999;
+    margin: 0 0 28px;
+  }
+  .option {
+    margin: 0 auto 36px;
+    max-width: 380px;
+  }
+  .option-label {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--magenta);
+    text-align: center;
+    margin: 0 0 4px;
+    font-weight: 700;
+  }
+  .option-title {
+    font-family: var(--font-serif);
+    font-size: 17px;
+    color: #fff;
+    text-align: center;
+    margin: 0 0 6px;
+    font-weight: 500;
+  }
+  .option-desc {
+    text-align: center;
+    font-size: 12px;
+    color: #999;
+    margin: 0 0 12px;
+    line-height: 1.5;
+  }
+  .pros-cons {
+    display: flex;
+    gap: 8px;
+    margin: 8px 0 0;
+    font-size: 11px;
+  }
+  .pros, .cons {
+    flex: 1;
+    padding: 8px 10px;
+    border-radius: 8px;
+  }
+  .pros { background: #1a3a2a; color: #6ee7b7; }
+  .cons { background: #3a1a1a; color: #fca5a5; }
+  .pros-cons .label {
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 9px;
+    margin-bottom: 4px;
+    opacity: 0.7;
+  }
+
+  /* The phone-frame card containing each mockup */
+  .frame {
+    background: var(--bg);
+    border-radius: 28px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    overflow: hidden;
+    position: relative;
+    /* Approx 16:9-ish phone proportion */
+    height: 420px;
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 14px;
+  }
+
+  /* Simulated iPhone Dynamic Island for visual context */
+  .island {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 28px;
+    background: #000;
+    border-radius: 16px;
+    z-index: 100;
+    pointer-events: none;
+  }
+
+  /* ===== Option A — Current (problem) ===== */
+  .frame.a {
+    padding-top: var(--notch);
+  }
+  .frame.a .body {
+    padding: 14px 22px 12px;
+  }
+
+  /* ===== Option B — Magenta header bar extending into notch ===== */
+  .frame.b .topbar {
+    background: var(--magenta);
+    padding: calc(var(--notch) + 4px) 22px 12px;
+    color: white;
+    margin-bottom: 4px;
+  }
+  .frame.b .topbar .label {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.85;
+    font-weight: 600;
+  }
+  .frame.b .topbar h1 {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 400;
+    color: white;
+    margin: 2px 0 0;
+    text-align: left;
+    line-height: 1.1;
+  }
+  .frame.b .topbar h1 em {
+    font-style: italic;
+  }
+  .frame.b .topbar .sub {
+    font-size: 11px;
+    opacity: 0.8;
+    font-style: italic;
+    margin-top: 4px;
+  }
+  .frame.b .body { padding: 12px 22px; }
+
+  /* ===== Option C — Compact: branding peeks into the safe area ===== */
+  .frame.c {
+    padding-top: calc(var(--notch) - 18px); /* pull content up */
+  }
+  .frame.c .brand {
+    position: absolute;
+    top: 14px;  /* sits beside the dynamic island */
+    left: 22px;
+    color: var(--magenta);
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 15px;
+    z-index: 50;
+  }
+  .frame.c .brand-right {
+    position: absolute;
+    top: 16px;
+    right: 22px;
+    z-index: 50;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--magenta-bg);
+    color: var(--magenta);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .frame.c .body { padding: 14px 22px 12px; }
+
+  /* ===== Option D — Gradient backdrop fading from magenta to cream ===== */
+  .frame.d {
+    background: linear-gradient(to bottom, var(--magenta-bg) 0%, var(--bg) 18%);
+    padding-top: calc(var(--notch) - 6px);
+  }
+  .frame.d .brand {
+    position: absolute;
+    top: 18px;
+    left: 22px;
+    color: var(--magenta);
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 16px;
+    z-index: 50;
+  }
+  .frame.d .nav-pills {
+    position: absolute;
+    top: 16px;
+    right: 18px;
+    z-index: 50;
+    display: flex;
+    gap: 6px;
+  }
+  .frame.d .nav-pills span {
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--cream);
+    border: 1px solid var(--rule);
+    color: var(--magenta);
+    text-align: center;
+    line-height: 26px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .frame.d .body { padding: 14px 22px 12px; }
+
+  /* ===== Shared content inside the body ===== */
+  .body .date {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--topaz);
+    font-weight: 600;
+  }
+  .body .greeting {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--amethyst);
+    margin: 4px 0 0;
+    line-height: 1.1;
+  }
+  .body .greeting em {
+    font-style: italic;
+    color: var(--magenta);
+  }
+  .body .sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+    font-style: italic;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin: 14px 22px 16px;
+  }
+  .stat {
+    background: var(--cream);
+    border: 1px solid var(--rule-soft);
+    border-radius: 10px;
+    padding: 8px 6px;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: var(--font-serif);
+    font-size: 18px;
+    color: var(--magenta);
+    font-weight: 500;
+  }
+  .stat-label {
+    font-size: 9px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .section-title {
+    padding: 0 22px 6px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .focus-card {
+    margin: 0 22px 8px;
+    padding: 12px 14px;
+    background: linear-gradient(135deg, #f5d6e8 0%, #e8c5f0 100%);
+    border-radius: 14px;
+  }
+  .focus-card .badge {
+    display: inline-block;
+    background: white;
+    color: var(--magenta);
+    font-size: 9px;
+    padding: 2px 7px;
+    border-radius: 99px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .focus-card .title {
+    font-family: var(--font-serif);
+    font-size: 16px;
+    margin-top: 6px;
+    color: var(--amethyst);
+  }
+</style>
+</head>
+<body>
+
+<h1>PA — top-of-screen options</h1>
+<p class="lead">scroll, compare, tell me which one you want</p>
+
+<!-- ============ Option A: Current (problem) ============ -->
+<div class="option">
+  <p class="option-label">Option A — Current state</p>
+  <p class="option-title">Cream blank under the notch</p>
+  <p class="option-desc">What the PWA looks like right now. Cream extends under the Dynamic Island; the actual greeting only starts ~70px down.</p>
+  <div class="frame a">
+    <div class="island"></div>
+    <div class="body">
+      <div class="date">Tuesday, June 3</div>
+      <h2 class="greeting">good <em>morning</em></h2>
+      <p class="sub">fresh slate · pick one</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-num">3</div><div class="stat-label">urgent</div></div>
+      <div class="stat"><div class="stat-num">2</div><div class="stat-label">done</div></div>
+      <div class="stat"><div class="stat-num">8</div><div class="stat-label">active</div></div>
+    </div>
+    <div class="section-title">Your focus</div>
+    <div class="focus-card">
+      <span class="badge">first up</span>
+      <div class="title">Reply to landlord</div>
+    </div>
+  </div>
+  <div class="pros-cons">
+    <div class="pros"><span class="label">good</span>simple, content-first</div>
+    <div class="cons"><span class="label">bad</span>wasted vertical space, no branding</div>
+  </div>
+</div>
+
+<!-- ============ Option B: Magenta top bar ============ -->
+<div class="option">
+  <p class="option-label">Option B — Magenta header bar</p>
+  <p class="option-title">Bold magenta extends into the notch</p>
+  <p class="option-desc">The brand colour fills the status-bar area. Greeting + subtitle move up into the bar so no space is wasted. Feels most "native app".</p>
+  <div class="frame b">
+    <div class="island"></div>
+    <div class="topbar">
+      <div class="label">Tuesday, June 3</div>
+      <h1>good <em>morning</em></h1>
+      <div class="sub">fresh slate · pick one</div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-num">3</div><div class="stat-label">urgent</div></div>
+      <div class="stat"><div class="stat-num">2</div><div class="stat-label">done</div></div>
+      <div class="stat"><div class="stat-num">8</div><div class="stat-label">active</div></div>
+    </div>
+    <div class="section-title">Your focus</div>
+    <div class="focus-card">
+      <span class="badge">first up</span>
+      <div class="title">Reply to landlord</div>
+    </div>
+  </div>
+  <div class="pros-cons">
+    <div class="pros"><span class="label">good</span>bold, no wasted space, native feel</div>
+    <div class="cons"><span class="label">bad</span>strong colour every screen, less calm</div>
+  </div>
+</div>
+
+<!-- ============ Option C: Compact branding peek ============ -->
+<div class="option">
+  <p class="option-label">Option C — Compact peek</p>
+  <p class="option-title">Tiny "PA" wordmark + indicator</p>
+  <p class="option-desc">Keeps the calm cream feel. A subtle "PA" word lives beside the Dynamic Island; a counter/indicator on the right shows review-queue size. Content starts 10px higher.</p>
+  <div class="frame c">
+    <div class="island"></div>
+    <span class="brand">PA</span>
+    <div class="brand-right">3</div>
+    <div class="body">
+      <div class="date">Tuesday, June 3</div>
+      <h2 class="greeting">good <em>morning</em></h2>
+      <p class="sub">fresh slate · pick one</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-num">3</div><div class="stat-label">urgent</div></div>
+      <div class="stat"><div class="stat-num">2</div><div class="stat-label">done</div></div>
+      <div class="stat"><div class="stat-num">8</div><div class="stat-label">active</div></div>
+    </div>
+    <div class="section-title">Your focus</div>
+    <div class="focus-card">
+      <span class="badge">first up</span>
+      <div class="title">Reply to landlord</div>
+    </div>
+  </div>
+  <div class="pros-cons">
+    <div class="pros"><span class="label">good</span>keeps calm cream feel, adds identity</div>
+    <div class="cons"><span class="label">bad</span>tiny brand could read as clutter</div>
+  </div>
+</div>
+
+<!-- ============ Option D: Gradient fade ============ -->
+<div class="option">
+  <p class="option-label">Option D — Gradient fade</p>
+  <p class="option-title">Soft magenta wash fades into cream</p>
+  <p class="option-desc">A whisper of brand colour at the very top fades into the cream within ~80px. Holds the "PA" wordmark + quick navigation pills. Feels editorial, like a magazine.</p>
+  <div class="frame d">
+    <div class="island"></div>
+    <span class="brand">PA</span>
+    <div class="nav-pills">
+      <span>♥</span>
+      <span>⚙</span>
+    </div>
+    <div class="body">
+      <div class="date">Tuesday, June 3</div>
+      <h2 class="greeting">good <em>morning</em></h2>
+      <p class="sub">fresh slate · pick one</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-num">3</div><div class="stat-label">urgent</div></div>
+      <div class="stat"><div class="stat-num">2</div><div class="stat-label">done</div></div>
+      <div class="stat"><div class="stat-num">8</div><div class="stat-label">active</div></div>
+    </div>
+    <div class="section-title">Your focus</div>
+    <div class="focus-card">
+      <span class="badge">first up</span>
+      <div class="title">Reply to landlord</div>
+    </div>
+  </div>
+  <div class="pros-cons">
+    <div class="pros"><span class="label">good</span>editorial, soft, room for actions</div>
+    <div class="cons"><span class="label">bad</span>more design complexity, more code</div>
+  </div>
+</div>
+
+<p style="text-align:center; color:#888; font-size:12px; margin-top:32px;">
+  Tap which one you want and I'll ship it.<br />
+  A &nbsp;·&nbsp; B &nbsp;·&nbsp; C &nbsp;·&nbsp; D &nbsp;·&nbsp; mix
+</p>
+
+</body>
+</html>

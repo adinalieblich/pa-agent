@@ -1,0 +1,92 @@
+# Secrets — never commit
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+secrets/
+credentials/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+ENV/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+*.egg-info/
+build/
+dist/
+
+# Node / PWA
+node_modules/
+.pnpm-store/
+dist/
+.vite/
+*.log
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Claude / AI tooling
+.claude/
+.cursor/
+
+# User data — anything personal lives in Notion, not here
+data/
+exports/
+
+# Build outputs
+*.tsbuildinfo
+.next/
+out/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Office lock files
+~$*
+
+# Runtime state — regenerated on each run
+state/nag_state.json
+
+# Excluded from public repo
+files.zip
+CLAUDE_CODE_INSTRUCTIONS.md
+PA-AGENT-API.docx
+PA_AGENT_SPEC.md
+
+# AWS SAM build artefacts
+.aws-sam/
+samconfig.local.toml
+
+# AWS credentials — NEVER commit
+*credentials*.csv
+*_credentials.csv
+aws_keys.txt
+.aws/

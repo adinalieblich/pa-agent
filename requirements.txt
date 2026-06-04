@@ -1,0 +1,34 @@
+# Web
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+
+# Config / models
+pydantic>=2.9.0
+pydantic-settings>=2.5.0
+python-dotenv>=1.0.1
+
+# Logging
+structlog>=24.4.0
+
+# External APIs
+anthropic>=0.40.0
+notion-client>=2.2.1
+
+# HTTP
+httpx>=0.27.0
+
+# AWS Lambda (only used when deployed; harmless locally)
+mangum>=0.18.0
+
+# IANA tz database — required on Windows where the OS doesn't ship one.
+tzdata>=2024.1
+
+# Web Push (Tier-3 notifications). pywebpush brings cryptography in for
+# VAPID signing. cryptography ships manylinux wheels compatible with
+# Lambda's python3.11 arm64 runtime.
+pywebpush>=2.0.0
+
+# Tests
+pytest>=8.3.0
+pytest-asyncio>=0.24.0
+respx>=0.21.1

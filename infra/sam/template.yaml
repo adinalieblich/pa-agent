@@ -1,0 +1,181 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  PA-Agent — voice-first personal AI assistant.
+  Two Lambdas (webhook + nag tick), HTTP API Gateway in front of the
+  webhook, EventBridge schedule for the nag worker, S3 for nag state,
+  SSM Parameter Store for secrets.
+
+Parameters:
+  Environment:
+    Type: String
+    Default: prod
+    AllowedValues: [prod, dev]
+    Description: Deployment environment — keys SSM path and resource names.
+
+  LogRetentionDays:
+    Type: Number
+    Default: 14
+    Description: CloudWatch log retention to keep costs predictable.
+
+Globals:
+  Function:
+    Runtime: python3.11
+    Architectures: [arm64]
+    MemorySize: 512
+    Timeout: 30
+    Tracing: Active
+    Environment:
+      Variables:
+        ENVIRONMENT: !Ref Environment
+        SSM_PARAM_PREFIX: !Sub /pa-agent/${Environment}/
+        LOG_LEVEL: INFO
+        NAG_POLL_INTERVAL_SECONDS: '300'
+        NAG_REPING_INTERVAL_SECONDS: '900'
+        NTFY_BASE_URL: https://ntfy.sh
+        # FastAPI host/port are unused under Mangum but kept for parity.
+        HOST: 0.0.0.0
+        PORT: '8000'
+    Tags:
+      Project: pa-agent
+      ManagedBy: SAM
+
+Resources:
+
+  # --- Storage ---------------------------------------------------------
+
+  NagStateBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub pa-agent-nag-state-${Environment}-${AWS::AccountId}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpireOldVersions
+            Status: Enabled
+            NoncurrentVersionExpirationInDays: 7
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+  # --- HTTP API (cheaper than REST API for this use case) -------------
+
+  HttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      Name: !Sub pa-agent-api-${Environment}
+      Description: PA-Agent webhook + PWA API
+      CorsConfiguration:
+        AllowOrigins:
+          - "*"
+        AllowMethods:
+          - GET
+          - POST
+          - OPTIONS
+        AllowHeaders:
+          - Content-Type
+          - X-PA-Token
+        MaxAge: 600
+
+  # --- Functions -------------------------------------------------------
+
+  WebhookFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub pa-agent-webhook-${Environment}
+      CodeUri: ../../
+      Handler: src.lambda_handlers.webhook.handler
+      Description: FastAPI webhook + PWA API behind API Gateway
+      Environment:
+        Variables:
+          NAG_STATE_BUCKET: !Ref NagStateBucket
+          NAG_STATE_KEY: nag_state.json
+          WORK_OVERRIDE_SSM_PARAM: !Sub /pa-agent/${Environment}/work-override
+      Events:
+        Root:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /
+            Method: ANY
+        ProxyAll:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /{proxy+}
+            Method: ANY
+      Policies:
+        - SSMParameterReadPolicy:
+            ParameterName: !Sub pa-agent/${Environment}/*
+        - S3CrudPolicy:
+            BucketName: !Ref NagStateBucket
+        # Webhook Lambda is the one that writes the work-mode override.
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ssm:PutParameter
+              Resource: !Sub arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/pa-agent/${Environment}/work-override
+
+  WebhookLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${WebhookFunction}
+      RetentionInDays: !Ref LogRetentionDays
+
+  NagTickFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub pa-agent-nag-${Environment}
+      CodeUri: ../../
+      Handler: src.lambda_handlers.nag_tick.handler
+      Description: One nag-tick invocation; EventBridge fires every 5 min
+      Timeout: 60
+      Environment:
+        Variables:
+          NAG_STATE_BUCKET: !Ref NagStateBucket
+          NAG_STATE_KEY: nag_state.json
+          WORK_OVERRIDE_SSM_PARAM: !Sub /pa-agent/${Environment}/work-override
+      Events:
+        FiveMinuteTick:
+          Type: Schedule
+          Properties:
+            Name: !Sub pa-agent-nag-${Environment}-5min
+            Schedule: rate(5 minutes)
+            Description: Poll Notion for overdue/urgent rows
+            Enabled: true
+      Policies:
+        - SSMParameterReadPolicy:
+            ParameterName: !Sub pa-agent/${Environment}/*
+        - S3CrudPolicy:
+            BucketName: !Ref NagStateBucket
+
+  NagTickLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${NagTickFunction}
+      RetentionInDays: !Ref LogRetentionDays
+
+Outputs:
+  ApiBaseUrl:
+    Description: Permanent base URL for the API
+    Value: !Sub https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com
+
+  CaptureUrl:
+    Description: URL to paste into the iOS Shortcut
+    Value: !Sub https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/capture
+
+  WebhookFunctionName:
+    Value: !Ref WebhookFunction
+
+  NagTickFunctionName:
+    Value: !Ref NagTickFunction
+
+  NagStateBucketName:
+    Value: !Ref NagStateBucket

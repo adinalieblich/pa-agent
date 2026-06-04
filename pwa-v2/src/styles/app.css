@@ -1,0 +1,1715 @@
+/* Layout + shared component styles for PA-Agent PWA.
+ *
+ * Sizing comes from the mockup. The mockup wraps each screen in a
+ * 320x660 fake iPhone frame; this is the REAL app, so we drop the
+ * frame and let the content fill the device viewport.
+ *
+ * Safe-area insets handle the iPhone notch + home indicator without
+ * us having to hardcode pixel values.
+ */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* Back to the simple model that at least produced cream:
+   - All three (html, body, #root) carry the same fixed gradient
+   - html ALSO has a solid cream background-color BELOW the gradient
+     as a last-resort fallback in case the gradient doesn't paint to
+     the very bottom in iOS standalone mode.
+   The background shorthand here is intentionally split: solid colour
+   first (paints everywhere), then the gradient image on top. */
+html, body, #root {
+  height: 100%;
+  background-color: var(--bg);
+  background-image: linear-gradient(180deg, #f5d6e8 0%, var(--bg) 22%);
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  /* Honour iPhone safe area at the top so content doesn't hide under the
+     notch / Dynamic Island. The bottom safe-area is handled inside the
+     fixed .tab-bar to avoid a doubled-up cream stripe between the body
+     padding and the tab bar. */
+  padding-top: env(safe-area-inset-top);
+  /* Block iOS overscroll bounce that exposes the parent doc bg */
+  overscroll-behavior-y: contain;
+}
+
+button {
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* ------------------------------------------------------------------
+ * App shell
+ * ------------------------------------------------------------------ */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.app-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  /* Reserve room for the tab bar AND the iOS home-indicator gesture zone.
+     The +safe-area-inset-bottom accounts for the gesture strip; before
+     this was handled by a fixed-positioned filler element that overlapped
+     the bottom of the scroll content and made list rows unreachable. */
+  padding-bottom: calc(88px + env(safe-area-inset-bottom));
+}
+
+/* ------------------------------------------------------------------
+ * Top tiles strip — 4 mini info tiles above every screen's content.
+ * ------------------------------------------------------------------ */
+.top-tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 6px;
+  padding: 10px 14px 12px;
+}
+.top-tiles .tile {
+  background: rgba(253, 246, 236, 0.85);
+  border: 1px solid rgba(232, 218, 192, 0.55);
+  border-radius: 12px;
+  padding: 10px 4px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transition: transform 120ms ease-out, background 120ms ease-out;
+  cursor: pointer;
+  min-height: 60px;
+  justify-content: center;
+}
+.top-tiles .tile:active {
+  transform: scale(0.96);
+  background: rgba(253, 246, 236, 1);
+}
+.top-tiles .tile-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+.top-tiles .tile-val {
+  font-family: var(--font-serif);
+  font-size: 14px;
+  color: var(--ink);
+  font-weight: 500;
+}
+.top-tiles .tile-label {
+  font-size: 9px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.top-tiles .tile.weather .tile-icon { color: var(--sapphire); }
+.top-tiles .tile.money   .tile-icon { color: var(--emerald); }
+.top-tiles .tile.streak  .tile-icon { color: var(--topaz); }
+.top-tiles .tile.review  .tile-icon { color: var(--magenta); }
+
+/* ------------------------------------------------------------------
+ * Nudge card — "Claude's take" one-liner under the greeting.
+ * ------------------------------------------------------------------ */
+.nudge-card {
+  display: block;
+  width: calc(100% - 2 * var(--pad-page-x));
+  margin: 12px var(--pad-page-x) 8px;
+  padding: 12px 14px 10px;
+  background: rgba(253, 246, 236, 0.75);
+  border: 1px solid rgba(183, 53, 121, 0.18);
+  border-left: 3px solid var(--magenta);
+  border-radius: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 120ms ease-out;
+}
+.nudge-card:active { background: rgba(245, 214, 232, 0.5); }
+.nudge-card[disabled] { opacity: 0.7; cursor: progress; }
+.nudge-card .nudge-label {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--magenta);
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.nudge-card .nudge-line {
+  font-family: var(--font-serif);
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--amethyst);
+  font-style: italic;
+}
+
+/* ------------------------------------------------------------------
+ * Quick Capture FAB — floating button at bottom-right.
+ * ------------------------------------------------------------------ */
+.fab {
+  position: fixed;
+  right: 18px;
+  bottom: calc(86px + env(safe-area-inset-bottom));
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: var(--magenta);
+  color: white;
+  box-shadow: 0 8px 22px rgba(183, 53, 121, 0.45);
+  font-size: 30px;
+  font-weight: 300;
+  line-height: 1;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 120ms ease-out;
+}
+.fab:active { transform: scale(0.94); }
+
+.fab-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(42, 26, 20, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fab-fade-in 180ms ease-out;
+}
+@keyframes fab-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.fab-sheet {
+  width: 100%;
+  max-width: 520px;
+  background: var(--cream);
+  border-radius: 20px 20px 0 0;
+  padding: 18px 18px calc(18px + env(safe-area-inset-bottom));
+  animation: fab-sheet-up 220ms ease-out;
+}
+@keyframes fab-sheet-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+.fab-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.fab-sheet-title {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-style: italic;
+  color: var(--magenta);
+}
+.fab-sheet-close {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--bg-deep);
+  color: var(--muted);
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.fab-sheet-input {
+  width: 100%;
+  font-family: inherit;
+  font-size: 16px;
+  color: var(--ink);
+  background: white;
+  border: 1px solid var(--rule-soft);
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+  min-height: 80px;
+  resize: none;
+  line-height: 1.45;
+}
+.fab-sheet-input:focus {
+  border-color: var(--magenta);
+  box-shadow: 0 0 0 3px var(--magenta-bg);
+}
+.fab-sheet-actions {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.fab-sheet-hint {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+.fab-sheet-send {
+  background: var(--magenta);
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 10px 22px;
+  border-radius: 12px;
+  min-height: 44px;
+}
+.fab-sheet-send:disabled {
+  background: var(--bg-deep);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+/* ------------------------------------------------------------------
+ * Page header — extracted from .page-header in mockup
+ * ------------------------------------------------------------------ */
+
+.page-header {
+  padding: 14px var(--pad-page-x) 12px;
+}
+.page-date {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--topaz);
+  font-weight: 600;
+}
+.page-title {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1.1;
+  margin-top: 4px;
+  color: var(--amethyst);
+  letter-spacing: -0.01em;
+}
+.page-title em {
+  font-style: italic;
+  color: var(--magenta);
+}
+.page-subtitle {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* ------------------------------------------------------------------
+ * Section heading — extracted from .section-head / .section-title
+ * ------------------------------------------------------------------ */
+
+.section-head {
+  padding: 0 var(--pad-page-x);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: var(--gap-section-y) 0 8px;
+}
+.section-title {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--topaz);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.section-title::before {
+  content: "";
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  background: var(--magenta);
+  border-radius: 50%;
+}
+.section-count {
+  font-size: 10px;
+  color: var(--muted);
+  font-family: var(--font-serif);
+  font-style: italic;
+}
+
+/* ------------------------------------------------------------------
+ * Stats row — extracted from .stats / .stat
+ * ------------------------------------------------------------------ */
+
+.stats {
+  margin: 0 var(--pad-card-x) 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+.stat {
+  background: var(--bg-deep);
+  border-radius: var(--r-stat);
+  padding: 10px 8px;
+  text-align: center;
+}
+.stat-num {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--amethyst);
+}
+.stat-num.emerald { color: var(--emerald); }
+.stat-num.ruby    { color: var(--ruby); }
+.stat-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------------
+ * Focus card — extracted from .focus-card
+ * ------------------------------------------------------------------ */
+
+.focus-card {
+  margin: 0 var(--pad-card-x) 4px;
+  padding: 14px 16px;
+  background: var(--focus-grad);
+  border-radius: var(--r-focus);
+}
+/* Focus card wraps in .task-row-wrap for swipe; reset margin so the
+   wrapper owns positioning. */
+.focus-row-wrap .focus-card {
+  margin: 0;
+}
+.focus-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+/* Check circle on the focus card — magenta border to fit the jewel-tone
+   gradient (the standard task check is emerald, which would clash here). */
+.focus-check {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--magenta);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.6);
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: background 120ms ease-out, transform 120ms ease-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.focus-check::before {
+  content: "";
+  position: absolute;
+  inset: -13px; /* 46x46 hit target */
+}
+.focus-check:active {
+  background: var(--magenta);
+  transform: scale(0.92);
+}
+.focus-badge {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--amethyst);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+.focus-title {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 500;
+  color: #2e1230;
+  line-height: 1.2;
+}
+.focus-step {
+  font-size: 11px;
+  color: var(--amethyst);
+  margin-top: 6px;
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.focus-step::before {
+  content: "→";
+  font-style: normal;
+}
+
+/* ------------------------------------------------------------------
+ * Task row — extracted from .task / .check / .task-text / .task-meta
+ * ------------------------------------------------------------------ */
+
+/* Wrapper that reveals the green "done" background during swipe. */
+.task-row-wrap {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-card);
+  margin: 0 var(--pad-card-x) var(--gap-card-y);
+}
+.task-row-wrap .task,
+.task-row-wrap .bill {
+  margin: 0; /* wrapper owns the spacing now */
+  position: relative;
+  z-index: 1;
+  touch-action: pan-y; /* let vertical scrolls through, capture horizontal */
+}
+.task-row-swipe-bg {
+  position: absolute;
+  inset: 0;
+  background: var(--emerald);
+  color: white;
+  border-radius: var(--r-card);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 22px;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  z-index: 0;
+}
+.task-row-swipe-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+.task-row-swipe-label {
+  text-transform: uppercase;
+}
+
+.task {
+  /* margin moved to .task-row-wrap; keep the rest. */
+  padding: 12px 14px;
+  background: var(--cream);
+  border-radius: var(--r-card);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--rule-soft);
+}
+/* The check needs a much bigger tap target than its visual size.
+   A 44×44 invisible hit-zone wraps the 18×18 visible square. */
+.task .check {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--emerald);
+  border-radius: 5px;
+  flex-shrink: 0;
+  background: white;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 120ms ease-out, transform 120ms ease-out;
+}
+.task .check::before {
+  /* iOS-standard 44×44 hit target. Invisible but takes the tap. */
+  content: "";
+  position: absolute;
+  inset: -13px;
+}
+.task .check:active {
+  background: var(--emerald);
+  transform: scale(0.92);
+}
+.task.checked .check {
+  background: var(--emerald);
+}
+.task.checked .check::after {
+  content: "✓";
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+.task.checked .task-text {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+.task-text {
+  font-size: 13px;
+  flex-grow: 1;
+  color: var(--ink);
+  min-width: 0; /* allow text truncation */
+}
+.task-text .meta {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.task-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+/* ------------------------------------------------------------------
+ * Tags — extracted from .tag.<jewel>
+ * ------------------------------------------------------------------ */
+
+.tag {
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: var(--r-pill);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.tag.ruby     { color: var(--ruby);     background: var(--ruby-bg); }
+.tag.emerald  { color: var(--emerald);  background: var(--emerald-bg); }
+.tag.amethyst { color: var(--amethyst); background: var(--amethyst-bg); }
+.tag.magenta  { color: var(--magenta);  background: var(--magenta-bg); }
+.tag.topaz    { color: var(--topaz);    background: var(--topaz-bg); }
+.tag.sapphire { color: var(--sapphire); background: var(--sapphire-bg); }
+.tag-time {
+  font-size: 10px;
+  color: var(--muted);
+  font-family: var(--font-serif);
+  font-style: italic;
+}
+
+/* ------------------------------------------------------------------
+ * Bill row — extracted from .bill / .bill-amount / .bill-body
+ *
+ * The mockup uses a 4px coloured left border to distinguish bill types:
+ *   - Ruby  = urgent (due in next 7 days)
+ *   - Amethyst = recurring subscription
+ * ------------------------------------------------------------------ */
+
+.bill {
+  margin: 0 var(--pad-card-x) var(--gap-card-y);
+  padding: 12px 14px;
+  background: var(--cream);
+  border-radius: 0 var(--r-card) var(--r-card) 0;
+  border: 1px solid var(--rule-soft);
+  border-left: 4px solid var(--ruby);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.bill.recurring { border-left-color: var(--amethyst); }
+
+.bill-amount {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ruby);
+  min-width: 64px;
+  text-align: left;
+}
+.bill.recurring .bill-amount { color: var(--amethyst); }
+
+.bill-body { flex-grow: 1; min-width: 0; }
+.bill-payee {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.bill-due {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* Bills total banner */
+.bills-total {
+  margin: 0 var(--pad-card-x) 14px;
+  padding: 14px 16px;
+  background: var(--cream);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-focus);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.bills-total-label {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--topaz);
+  font-weight: 600;
+}
+.bills-total-amount {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--ruby);
+  letter-spacing: -0.01em;
+}
+
+/* ------------------------------------------------------------------
+ * Project card — extracted from .project-card / .project-progress
+ * ------------------------------------------------------------------ */
+
+.project-card {
+  margin: 0 var(--pad-card-x) 10px;
+  padding: 14px 16px;
+  background: var(--cream);
+  border-radius: var(--r-focus);
+  border: 1px solid var(--rule-soft);
+}
+.project-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  gap: 10px;
+}
+.project-title {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink);
+  flex-grow: 1;
+}
+.project-progress {
+  height: 4px;
+  background: var(--rule-soft);
+  border-radius: var(--r-pill);
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.project-progress-fill {
+  height: 100%;
+  background: var(--emerald);
+  border-radius: var(--r-pill);
+  transition: width 240ms ease-out;
+}
+.project-meta {
+  font-size: 10px;
+  color: var(--muted);
+  display: flex;
+  gap: 10px;
+}
+.project-next {
+  font-size: 11px;
+  color: var(--amethyst);
+  margin-top: 6px;
+  font-style: italic;
+}
+.project-next::before { content: "↗ next: "; font-style: normal; }
+
+/* ------------------------------------------------------------------
+ * Wins page — extracted from .wins-day / .wins-day-label / .win
+ * ------------------------------------------------------------------ */
+
+.wins-day {
+  margin: 0 var(--pad-card-x) 14px;
+}
+.wins-day-label {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-style: italic;
+  color: var(--amethyst);
+  margin-bottom: 6px;
+  padding: 0 4px;
+}
+.wins-day-list {
+  background: var(--cream);
+  border-radius: var(--r-card);
+  border: 1px solid var(--rule-soft);
+  padding: 4px 0;
+}
+.win {
+  padding: 9px 14px;
+  font-size: 12px;
+  color: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.win + .win { border-top: 1px dashed var(--rule-soft); }
+.win-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--emerald);
+  flex-shrink: 0;
+}
+
+/* ------------------------------------------------------------------
+ * Detail screens — extracted from .detail-* / .subtask in mockup
+ *
+ * Shared between Task Detail (Screen 6) and Project Detail (Screen 7).
+ * Section pattern: thin top rule, uppercase topaz label, body text.
+ * Subtask rows use a dashed top rule to read as a continuous list.
+ * ------------------------------------------------------------------ */
+
+.detail-back {
+  font-size: 12px;
+  color: var(--magenta);
+  padding: 14px var(--pad-page-x) 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+  background: none;
+}
+.detail-back::before { content: "← "; }
+
+.detail-title {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.15;
+  padding: 0 var(--pad-page-x);
+  color: var(--ink);
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+
+.detail-meta-row {
+  padding: 0 var(--pad-page-x);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.detail-section {
+  padding: 12px var(--pad-page-x);
+  border-top: 1px solid var(--rule-soft);
+  font-size: 13px;
+}
+.detail-section-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--topaz);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.detail-section-text {
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+.detail-section-text.amount {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  color: var(--ruby);
+}
+.detail-section-text.next {
+  color: var(--amethyst);
+  font-style: italic;
+}
+.detail-section-text.next::before { content: "→ "; font-style: normal; }
+
+/* Project Detail subtask rows — mirrors .subtask in the mockup. */
+.subtask {
+  padding: 10px var(--pad-page-x);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  border-top: 1px dashed var(--rule-soft);
+  background: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+.subtask .check {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--emerald);
+  border-radius: 4px;
+  flex-shrink: 0;
+  background: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.subtask.checked .check {
+  background: var(--emerald);
+}
+.subtask.checked .check::after {
+  content: "✓";
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+}
+.subtask.checked .subtask-text {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+.subtask-text { flex-grow: 1; min-width: 0; color: var(--ink); }
+.subtask-text .meta {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* Detail-screen action bar at the very bottom of the scroll area. */
+.detail-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin: 22px var(--pad-card-x) 12px;
+}
+.detail-action-btn {
+  padding: 12px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  min-height: 44px;
+  letter-spacing: 0.02em;
+}
+.detail-action-btn.done    { background: var(--emerald); color: white; }
+.detail-action-btn.snooze  { background: var(--topaz-bg); color: var(--topaz); }
+.detail-action-btn.edit    { background: var(--amethyst-bg); color: var(--amethyst); }
+.detail-action-btn.delete  { background: var(--ruby-bg); color: var(--ruby); }
+
+/* The 4-button row gets a bit cramped — let actions wrap to two lines on
+   narrow phones so labels stay legible. */
+.detail-actions {
+  flex-wrap: wrap;
+}
+.detail-actions .detail-action-btn {
+  flex: 1 1 calc(50% - 4px);
+}
+
+/* ------------------------------------------------------------------
+ * Inline edit inputs on Task Detail
+ * ------------------------------------------------------------------ */
+
+.detail-edit-input {
+  width: 100%;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  background: white;
+  border: 1px solid var(--rule-soft);
+  border-radius: 10px;
+  padding: 10px 12px;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+  transition: border-color 120ms ease-out, box-shadow 120ms ease-out;
+}
+.detail-edit-input:focus {
+  border-color: var(--magenta);
+  box-shadow: 0 0 0 3px var(--magenta-bg);
+}
+.detail-edit-input.title {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.2;
+  margin: 0 var(--pad-card-x) 8px;
+  width: calc(100% - 2 * var(--pad-card-x));
+}
+.detail-edit-input.notes {
+  min-height: 96px;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+/* ------------------------------------------------------------------
+ * Review queue — extracted from .review-card / .review-* / .review-btn
+ * ------------------------------------------------------------------ */
+
+.review-card {
+  margin: 0 var(--pad-card-x) 8px;
+  padding: 12px 14px;
+  background: var(--cream);
+  border-radius: 0 var(--r-card) var(--r-card) 0;
+  border: 1px solid var(--rule-soft);
+  border-left: 4px solid var(--magenta);
+}
+.review-original {
+  font-size: 11px;
+  color: var(--muted);
+  font-style: italic;
+  margin-bottom: 6px;
+}
+.review-original::before { content: "“"; }
+.review-original::after  { content: "”"; }
+.review-interpreted {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+.review-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.review-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+.review-btn {
+  flex-grow: 1;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  min-height: 36px;
+  letter-spacing: 0.02em;
+}
+.review-btn.confirm { background: var(--emerald); color: white; }
+.review-btn.edit    { background: var(--topaz-bg); color: var(--topaz); }
+.review-btn.delete  { background: var(--ruby-bg); color: var(--ruby); }
+
+/* ------------------------------------------------------------------
+ * Bell chip — shown in the page header when /review has items.
+ * Acts like a notification badge with a count + link target.
+ * ------------------------------------------------------------------ */
+
+.header-bell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--magenta);
+  background: var(--magenta-bg);
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  margin-top: 8px;
+}
+.header-bell::before { content: "✦"; }
+
+/* ------------------------------------------------------------------
+ * Inline-edit modal — used by Review-queue "edit" + future detail edits
+ * ------------------------------------------------------------------ */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  /* 100dvh follows the visible viewport on iOS — when the keyboard rises
+     the height shrinks so the modal stays in-frame. Fallback to 100vh. */
+  height: 100vh;
+  height: 100dvh;
+  background: rgba(42, 26, 20, 0.55);
+  /* Beat absolutely everything else: FAB (60), tab bar (50), toasts (200).
+     Even if a parent unexpectedly creates a stacking context, this stays
+     on top within that context. */
+  z-index: 9999;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+}
+.modal {
+  background: var(--bg);
+  width: 100%;
+  max-width: 540px;
+  /* Cap the height so we always leave a tap-to-dismiss strip at the top
+     of the backdrop, and the modal stays within the visible viewport. */
+  max-height: 92dvh;
+  display: flex;
+  flex-direction: column;
+  border-radius: 18px 18px 0 0;
+  animation: modal-up 180ms ease-out;
+  overflow: hidden;          /* contain the rounded corners */
+}
+.modal-scroll {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 22px var(--pad-page-x) 8px;
+}
+@keyframes modal-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+.modal h2 {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--amethyst);
+  margin-bottom: 12px;
+}
+.modal label {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--topaz);
+  font-weight: 600;
+  margin: 10px 0 4px;
+}
+.modal input,
+.modal select,
+.modal textarea {
+  width: 100%;
+  font: inherit;
+  font-size: 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: var(--cream);
+  color: var(--ink);
+  outline: none;
+}
+.modal textarea { min-height: 64px; resize: vertical; }
+.modal input:focus, .modal select:focus, .modal textarea:focus {
+  border-color: var(--magenta);
+}
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  /* Stick the actions to the bottom of the modal so Save/Cancel are
+     always reachable, no matter how long the form gets. */
+  flex: 0 0 auto;
+  padding: 14px var(--pad-page-x) calc(14px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--rule);
+  background: var(--bg);
+}
+.modal-actions button {
+  flex-grow: 1;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  min-height: 44px;
+}
+.modal-actions .save   { background: var(--magenta); color: white; }
+.modal-actions .cancel { background: var(--cream); color: var(--ink-soft); border: 1px solid var(--rule); }
+
+/* ------------------------------------------------------------------
+ * Toast — transient feedback for action results
+ * ------------------------------------------------------------------ */
+
+.toast {
+  position: fixed;
+  bottom: calc(96px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ink);
+  color: var(--cream);
+  padding: 10px 14px 10px 18px;
+  border-radius: 24px;
+  font-size: 13px;
+  font-weight: 500;
+  max-width: 88vw;
+  z-index: 200;
+  animation: toast-in 180ms ease-out;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.toast.success { background: var(--emerald); }
+.toast.error   { background: var(--ruby); }
+.toast.muted   { background: var(--ink-soft); }
+.toast-message {
+  /* room for a long row title without crowding the action button */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.toast-action {
+  background: rgba(253, 246, 236, 0.18);
+  color: var(--cream);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border-radius: 16px;
+  flex-shrink: 0;
+  transition: background 120ms ease-out;
+}
+.toast-action:active {
+  background: rgba(253, 246, 236, 0.32);
+}
+.toast-action:disabled { opacity: 0.5; cursor: not-allowed; }
+@keyframes toast-in {
+  from { opacity: 0; transform: translate(-50%, 10px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* ------------------------------------------------------------------
+ * Row tap-affordance: list rows behave as buttons for accessibility
+ * ------------------------------------------------------------------ */
+
+/* Tap-affordance wrapper for non-button elements (divs / spans) used as
+ * row buttons. Applying role="button" + tabIndex=0 + this class gives us
+ * keyboard + screen-reader semantics without nesting a <div> inside a
+ * <button> (which is invalid HTML and breaks Mobile Safari tap targets).
+ */
+.tappable {
+  cursor: pointer;
+  -webkit-tap-highlight-color: rgba(183, 53, 121, 0.08);
+  outline: none;
+}
+.tappable:active { opacity: 0.85; }
+.tappable:focus-visible { outline: 2px solid var(--magenta); outline-offset: 2px; }
+
+/* Legacy alias — left in for any inline-button helpers still referencing it. */
+.row-button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+.row-button:active { opacity: 0.85; }
+
+/* ------------------------------------------------------------------
+ * Browse — type chooser grid (Phase 2)
+ *
+ * Four large cards in a 2x2 grid. Each card has an emoji icon, title
+ * and a one-line summary fetched from the relevant /api endpoint. The
+ * accent variants (sapphire/amethyst/topaz/emerald) tint the BG so the
+ * grid reads as "these are different worlds" at a glance.
+ * ------------------------------------------------------------------ */
+
+.browse-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  padding: 4px 22px 22px;
+}
+.browse-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 18px 16px 16px;
+  min-height: 132px;
+  border: 1px solid var(--rule);
+  border-radius: 18px;
+  background: var(--cream);
+  color: var(--ink);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: transform 80ms ease-out, box-shadow 80ms ease-out;
+}
+.browse-card:active {
+  transform: scale(0.985);
+  box-shadow: inset 0 0 0 1px var(--rule);
+}
+.browse-card-icon {
+  font-size: 28px;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.browse-card-title {
+  font-family: var(--font-serif, var(--font-sans));
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.browse-card-detail {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Accent variants — light tint of the corresponding jewel BG */
+.browse-card-sapphire { background: #e0e8f5; }
+.browse-card-amethyst { background: var(--amethyst-bg); }
+.browse-card-topaz    { background: #f5ead6; }
+.browse-card-emerald  { background: var(--emerald-bg); }
+
+/* ------------------------------------------------------------------
+ * Work-mode pill on Today (D7) — status + one-tap override
+ * ------------------------------------------------------------------ */
+
+.workmode-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 22px 10px;
+  padding: 8px 12px 8px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  background: var(--cream);
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  max-width: calc(100% - 44px);
+}
+.workmode-pill-on {
+  background: #e0e8f5;          /* light sapphire for "work mode is on" */
+  border-color: transparent;
+  color: var(--ink);
+}
+.workmode-pill-off {
+  background: var(--bg-deep);
+  border-color: transparent;
+}
+.workmode-pill:active { transform: scale(0.985); }
+.workmode-pill.is-busy { opacity: 0.6; }
+.workmode-pill-icon { font-size: 14px; line-height: 1; }
+.workmode-pill-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.workmode-pill-action {
+  margin-left: auto;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--cream);
+  font-size: 11px;
+  color: var(--muted);
+  border: 1px solid var(--rule);
+}
+.workmode-pill-on .workmode-pill-action { background: rgba(255,255,255,0.65); }
+
+/* ------------------------------------------------------------------
+ * Browse card → inline action button (Work card's "start now")
+ * ------------------------------------------------------------------ */
+
+.browse-card-wrap { display: flex; flex-direction: column; gap: 8px; }
+.browse-card-action {
+  align-self: stretch;
+  padding: 8px 12px;
+  background: var(--ink);
+  color: var(--cream);
+  border: none;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.browse-card-action:active { opacity: 0.85; }
+.browse-card-action:disabled { opacity: 0.5; }
+
+/* Hidden-work hint under the Today feed when work mode is OFF */
+.hidden-work-hint {
+  display: block;
+  margin: 14px 22px 0;
+  padding: 10px 14px;
+  background: transparent;
+  border: 1px dashed var(--rule);
+  border-radius: 12px;
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  width: calc(100% - 44px);
+  cursor: pointer;
+}
+.hidden-work-hint:active { background: var(--bg-deep); }
+.hidden-work-hint-link { color: var(--ink-soft); margin-left: 4px; }
+
+/* Tappable tag — shows it's interactive without breaking the chip aesthetic */
+.tag-button {
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+.tag-button:active { transform: scale(0.97); }
+.tag-button:disabled { opacity: 0.6; }
+.tag-button.sapphire { background: #e0e8f5; color: #1d3b7c; }
+.tag-button.neutral { background: var(--cream); color: var(--ink-soft); border-color: var(--rule); }
+
+/* ------------------------------------------------------------------
+ * Notifications banner (Phase 3) — Web Push enrol surface
+ * ------------------------------------------------------------------ */
+
+.notif-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 22px 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: var(--cream);
+  font-size: 13px;
+  color: var(--ink-soft);
+  flex-wrap: wrap;
+}
+.notif-banner-on { background: var(--emerald-bg); border-color: transparent; }
+.notif-banner-warn { background: #fff1cf; border-color: transparent; }
+.notif-banner-icon { font-size: 16px; line-height: 1; }
+.notif-banner-text { flex: 1; min-width: 0; }
+.notif-banner-action {
+  background: transparent;
+  border: 1px solid var(--rule);
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.notif-banner-action-primary {
+  background: var(--magenta);
+  color: var(--cream);
+  border-color: transparent;
+}
+.notif-banner-action:active { opacity: 0.8; }
+.notif-banner-action:disabled { opacity: 0.5; }
+.notif-banner-message {
+  flex-basis: 100%;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* ------------------------------------------------------------------
+ * Today (Phase 2) — greeting variants + Coming Up collapsible
+ * ------------------------------------------------------------------ */
+
+.greeting-emoji {
+  display: inline-block;
+  margin-left: 4px;
+  font-size: 0.85em;
+  vertical-align: baseline;
+}
+
+.section-head-toggle {
+  width: calc(100% - 44px);
+  margin: 14px 22px 4px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font: inherit;
+  text-align: left;
+}
+.section-head-toggle:active { opacity: 0.7; }
+.section-chevron {
+  display: inline-block;
+  margin-left: 8px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* ------------------------------------------------------------------
+ * Review (Phase 2) — Needs a date / AI flagged / Parked strip
+ * ------------------------------------------------------------------ */
+
+.needs-date-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  margin: 8px 22px;
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  background: #f5ead6;
+}
+.needs-date-title {
+  font-size: 15px;
+  color: var(--ink);
+  text-align: left;
+}
+.needs-date-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.needs-date-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--cream);
+  color: var(--ink-soft);
+  font-size: 13px;
+  cursor: pointer;
+  font: inherit;
+}
+.needs-date-chip:active { background: var(--bg-deep); }
+.needs-date-chip-picker { position: relative; padding: 4px 10px; }
+.needs-date-chip-picker input[type="date"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+/* Parked entry strip on Review (closed by default) */
+.parked-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: calc(100% - 44px);
+  margin: 18px 22px 8px;
+  padding: 12px 14px;
+  border: 1px dashed var(--rule);
+  border-radius: 14px;
+  background: transparent;
+  color: var(--ink-soft);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.parked-strip:active { background: var(--bg-deep); }
+.parked-strip-icon { font-size: 18px; }
+.parked-strip-label { flex: 1; font-size: 14px; }
+.parked-strip-count {
+  font-size: 12px;
+  color: var(--muted);
+  background: var(--cream);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+.parked-strip-chevron { color: var(--muted); font-size: 18px; }
+
+/* ------------------------------------------------------------------
+ * Parked sub-screen
+ * ------------------------------------------------------------------ */
+
+.page-back {
+  display: inline-block;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: left;
+}
+.parked-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 16px;
+  margin: 8px 22px;
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  background: var(--cream);
+}
+.parked-row-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.parked-row-title {
+  flex: 1;
+  font-size: 15px;
+  color: var(--ink);
+}
+.parked-row-badge { font-size: 11px; }
+.parked-row-meta { font-size: 12px; color: var(--muted); }
+.parked-row-actions { display: flex; gap: 8px; }
+
+/* ------------------------------------------------------------------
+ * Tab bar — extracted from .tab-bar / .tab / .tab-icon
+ * ------------------------------------------------------------------ */
+
+/* iOS Safari sometimes renders backdrop-filter regions as ghostly white
+   in standalone PWA mode, and the home-indicator gesture zone can also
+   pick up odd OS-side colours. Fully opaque cream + a paired safe-area
+   filler element below puts both issues to bed.
+
+   Order matters: .safe-area-filler is z-index 49, .tab-bar is 50; the
+   filler sits behind the tab bar and only shows in the very bottom
+   strip where iOS reserves the gesture zone. */
+
+/* In iOS standalone PWA mode, ``position: fixed; bottom: 0`` sometimes
+   anchors to the body's safe-area boundary instead of the actual screen
+   bottom, leaving the home-indicator zone uncovered. We push this element
+   BELOW that boundary with a negative ``bottom`` equal to the safe-area
+   inset, and make it tall enough to cover both the displaced anchor AND
+   the part of the tab bar above it. */
+.safe-area-filler {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* Just enough to paint the iOS home-indicator gesture zone behind the
+     tab bar (so a stray white strip can never peek through). Previously
+     this was ~208px tall — way too much, and it occluded the bottom of
+     the scroll content. Now it's only the safe-area inset itself. */
+  height: env(safe-area-inset-bottom);
+  background: var(--bg);
+  z-index: 49;
+  pointer-events: none;
+}
+
+/* Apply the same trick to the tab bar so its background also reaches
+   the actual screen bottom. Its internal padding still positions the
+   icons correctly above the home-indicator zone. */
+.tab-bar {
+  bottom: calc(-1 * env(safe-area-inset-bottom));
+  padding-bottom: calc(4px + env(safe-area-inset-bottom) * 2);
+}
+
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  /* Solid opaque cream — matches body BG, no blur, no surprise from iOS. */
+  background: var(--bg);
+  border-top: 1px solid rgba(232, 218, 192, 0.6);
+  /* Tight top padding so icons sit near the home-indicator zone. */
+  padding: 3px 14px calc(4px + env(safe-area-inset-bottom));
+  display: flex;
+  justify-content: space-around;
+  z-index: 50;
+}
+.tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  padding: 0;
+  /* widen touch target without changing visual size */
+  min-width: 44px;
+  min-height: 44px;
+  justify-content: center;
+}
+.tab-icon {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+.tab.active { color: var(--magenta); }
+.tab.active .tab-icon {
+  background: var(--magenta-bg);
+  border-radius: 8px;
+}
+
+/* ------------------------------------------------------------------
+ * Empty / loading state
+ * ------------------------------------------------------------------ */
+
+.empty {
+  padding: 40px var(--pad-page-x);
+  text-align: center;
+}
+.empty-art {
+  font-size: 36px;
+  margin-bottom: 12px;
+  color: var(--magenta);
+}
+.empty-msg {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.skeleton {
+  margin: 0 var(--pad-card-x) var(--gap-card-y);
+  height: 56px;
+  background: linear-gradient(
+    90deg,
+    var(--cream) 0%,
+    var(--bg-deep) 50%,
+    var(--cream) 100%
+  );
+  background-size: 200% 100%;
+  border-radius: var(--r-card);
+  animation: shimmer 1.2s infinite;
+}
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ------------------------------------------------------------------
+ * Token-entry screen (first-run auth)
+ * ------------------------------------------------------------------ */
+
+.token-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 32px;
+}
+.token-card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--cream);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  padding: 28px 24px;
+}
+.token-card h1 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 28px;
+  color: var(--amethyst);
+  margin-bottom: 4px;
+  letter-spacing: -0.01em;
+}
+.token-card h1 em { color: var(--magenta); font-style: italic; }
+.token-card p {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 18px;
+  font-style: italic;
+}
+.token-card input {
+  width: 100%;
+  font-family: "SF Mono", Menlo, monospace;
+  font-size: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--ink);
+  outline: none;
+}
+.token-card input:focus { border-color: var(--magenta); }
+.token-card button {
+  margin-top: 12px;
+  width: 100%;
+  padding: 12px;
+  background: var(--magenta);
+  color: white;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+}
+.token-error {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--ruby);
+  font-style: italic;
+}
