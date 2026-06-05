@@ -1,0 +1,154 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>Email setup · hello@adinalieblich.com</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,700;0,9..144,800;0,9..144,900;1,9..144,400&family=Inter+Tight:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+:root{
+  --ink:#2E1840; --paper:#F3ECFA; --cream:#FFF8F0;
+  --purple:#A752AA; --purple-d:#7d3c80; --orange:#FF692A;
+  --lilac:#EAB7FE; --blush:#F8D4EB; --periw:#B8C5FF;
+  --teal:#5E7E80; --teal-d:#3d5859;
+  --line:rgba(46,24,64,0.10);
+  --font-display:'Fraunces',Georgia,serif;
+  --font-body:'Inter Tight',system-ui,sans-serif;
+  --font-mono:'IBM Plex Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--font-body);color:var(--ink);background:var(--paper);line-height:1.6;font-size:14px;padding:40px 32px 60px;}
+.wrap{max-width:920px;margin:0 auto;}
+header.cover{padding:0 0 40px;border-bottom:2px solid var(--ink);margin-bottom:40px;}
+.cover-eyebrow{font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:var(--purple);margin-bottom:20px;}
+.cover-byline{font-family:var(--font-mono);font-size:11px;color:var(--teal-d);letter-spacing:.12em;text-transform:uppercase;margin-top:24px;}
+h1{font-family:var(--font-display);font-weight:900;font-size:64px;line-height:0.95;letter-spacing:-0.03em;color:var(--ink);margin-bottom:24px;}
+h1 em{font-style:italic;font-weight:400;color:var(--purple);}
+h2{font-family:var(--font-display);font-weight:800;font-size:32px;line-height:1.1;letter-spacing:-0.02em;color:var(--ink);margin:48px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--line);page-break-after:avoid;}
+h2 em{font-style:italic;font-weight:400;color:var(--purple);}
+h3{font-family:var(--font-display);font-weight:700;font-size:22px;color:var(--ink);margin:32px 0 12px;page-break-after:avoid;}
+h3 em{font-style:italic;font-weight:400;color:var(--purple);}
+h4{font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--teal-d);margin:24px 0 10px;}
+p,ul,ol{margin:0 0 14px;}
+ul,ol{padding-left:24px;}
+li{margin-bottom:6px;line-height:1.55;}
+li>p{margin-bottom:8px;}
+strong{font-weight:700;color:var(--ink);}
+em{font-style:italic;}
+a{color:var(--purple);text-decoration:underline;}
+hr{border:0;border-top:1px solid var(--line);margin:32px 0;}
+code{font-family:var(--font-mono);font-size:13px;background:rgba(167,82,170,0.08);color:var(--purple-d);padding:1px 6px;border-radius:4px;}
+pre{background:var(--ink);color:var(--paper);border-radius:10px;padding:18px 22px;overflow-x:auto;font-family:var(--font-mono);font-size:12.5px;line-height:1.5;margin:16px 0;}
+pre code{background:transparent;color:inherit;padding:0;}
+blockquote{background:var(--cream);border-left:4px solid var(--purple);padding:14px 20px;margin:16px 0;font-family:var(--font-display);font-style:italic;font-size:15px;border-radius:6px;}
+blockquote p{margin-bottom:8px;}
+blockquote p:last-child{margin-bottom:0;}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px;background:white;border-radius:8px;overflow:hidden;}
+th{background:var(--ink);color:var(--paper);font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;text-align:left;padding:10px 14px;}
+td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top;}
+tr:last-child td{border-bottom:0;}
+.foot{margin-top:48px;padding-top:24px;border-top:1px solid var(--line);font-family:var(--font-mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--teal-d);text-align:center;}
+@page{margin:18mm;}
+@media print{
+  body{padding:0;background:white;}
+  h2,h3{page-break-after:avoid;}
+  pre,table,blockquote{page-break-inside:avoid;}
+}
+</style>
+</head><body><div class="wrap">
+<header class="cover">
+  <div class="cover-eyebrow">Cloudflare · 5 min · free</div>
+  <h1>Email <em>setup</em>.</h1>
+  <div class="cover-byline">By Adina Lieblich · Civil engineer · Perth, Australia</div>
+</header>
+<p>The portfolio site, cinematic v2 page, all 6 concepts, and the README concept all link <code>mailto:hello@adinalieblich.com</code>. That address is <strong>not currently receiving mail</strong>. This doc walks through wiring it up via Cloudflare Email Routing — free, ~5 minutes, no card needed.</p>
+<h2>Why Cloudflare</h2>
+<ul>
+<li>Free (no card, no trial)</li>
+<li>Forwards to your real inbox (Gmail) — you read + reply from there</li>
+<li>No DNS expertise needed — Cloudflare does the SPF/DKIM/MX records for you</li>
+<li>Recipient address can be anything: <code>hello@</code>, <code>adina@</code>, <code>me@</code> — all forward to the same Gmail</li>
+<li>LinkedIn / recruiters see a professional domain address, not your personal Gmail</li>
+</ul>
+<h2>Setup (5 min)</h2>
+<h3>1. Move DNS to Cloudflare (if not already)</h3>
+<p>You can check at https://dash.cloudflare.com/ — log in, look for <code>adinalieblich.com</code> in your sites. If it's there, skip to step 2.</p>
+<p>If it's not:
+1. https://dash.cloudflare.com/ → Add site → enter <code>adinalieblich.com</code>
+2. Pick the Free plan
+3. Cloudflare will show you 2 nameservers (looks like <code>ns1.cloudflare.com</code> / <code>ns2.cloudflare.com</code>)
+4. At your domain registrar (probably GoDaddy / Namecheap), change the nameservers to the Cloudflare ones
+5. Wait 5-30 min for propagation
+6. Cloudflare emails you "site is active" when done</p>
+<p><strong>Note</strong>: changing nameservers may briefly affect your existing DNS records (the ones pointing app.adinalieblich.com, vote.<em>, demo.</em> at AWS). Cloudflare imports them automatically but verify after the switch that those subdomains still resolve.</p>
+<h3>2. Enable Email Routing</h3>
+<ol>
+<li>In Cloudflare dashboard → click <code>adinalieblich.com</code></li>
+<li>Left sidebar → <strong>Email</strong> → <strong>Email Routing</strong></li>
+<li>Click <strong>Get Started</strong> / <strong>Enable</strong></li>
+<li>Cloudflare will auto-add the necessary MX + TXT (SPF) records — accept them</li>
+<li>Wait ~1 min for the records to propagate</li>
+</ol>
+<h3>3. Add the forwarding rule</h3>
+<ol>
+<li>In Email Routing → <strong>Routes</strong> tab</li>
+<li>Click <strong>Create address</strong></li>
+<li>Custom address: <code>hello</code></li>
+<li>Action: <strong>Send to an email</strong></li>
+<li>Destination: your Gmail (e.g. <code>adinalieblich@gmail.com</code>)</li>
+<li>Save</li>
+</ol>
+<h3>4. Verify destination</h3>
+<ul>
+<li>Gmail will get a "verify this destination" email from Cloudflare</li>
+<li>Click the link</li>
+<li>Done</li>
+</ul>
+<h3>5. Test it</h3>
+<p>Send a test email from your phone to <code>hello@adinalieblich.com</code>. Should land in your Gmail inbox within ~30 seconds.</p>
+<h2>Optional — catch-all</h2>
+<p>In Email Routing → <strong>Routes</strong> → <strong>Catch-all address</strong> → set to forward to your Gmail. Then <code>anything@adinalieblich.com</code> works (<code>adina@</code>, <code>me@</code>, <code>engineer@</code>, etc). Useful for giving different addresses for different contexts (e.g. <code>careers@</code> on LinkedIn).</p>
+<h2>What lives where (after setup)</h2>
+<table>
+<thead>
+<tr>
+<th>Address</th>
+<th>Where it appears</th>
+<th>Goes to</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>hello@adinalieblich.com</code></td>
+<td>Portfolio contact section, all 6 concept pages, cinematic v2</td>
+<td>Your Gmail</td>
+</tr>
+<tr>
+<td><code>mailto:</code> links</td>
+<td>Every concept's contact CTA</td>
+<td>Triggers your default mail app to compose</td>
+</tr>
+</tbody>
+</table>
+<h2>If you want to change the address</h2>
+<p>Just edit the 9 files where it appears:</p>
+<pre><code class="language-bash">grep -rn &quot;hello@adinalieblich.com&quot; pwa-v2/public/
+</code></pre>
+<p>Files (as of this writing):
+- <code>pwa-v2/public/concepts/brutalist.html</code>
+- <code>pwa-v2/public/concepts/editorial.html</code>
+- <code>pwa-v2/public/concepts/gallery.html</code>
+- <code>pwa-v2/public/concepts/terminal.html</code>
+- <code>pwa-v2/public/concepts/readme.html</code>
+- <code>pwa-v2/public/portfolio-preview.html</code></p>
+<p>Sed one-liner if you want to rename to <code>adina@adinalieblich.com</code>:</p>
+<pre><code class="language-bash">find pwa-v2/public -name &quot;*.html&quot; -exec sed -i 's/hello@adinalieblich.com/adina@adinalieblich.com/g' {} \;
+</code></pre>
+<p>Then add the new prefix to Cloudflare Email Routing → Routes.</p>
+<hr />
+<h2>TL;DR</h2>
+<p>5 steps to working email at <code>hello@adinalieblich.com</code>:
+1. Site on Cloudflare ✓
+2. Enable Email Routing ✓
+3. Add <code>hello</code> → your Gmail rule ✓
+4. Verify Gmail destination ✓
+5. Test ✓</p>
+<p>No code change needed on the portfolio. The address already works in HTML.</p>
+<div class="foot">adinalieblich.com · 2026</div>
+</div></body></html>
